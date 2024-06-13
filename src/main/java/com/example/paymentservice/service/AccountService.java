@@ -1,15 +1,21 @@
 package com.example.paymentservice.service;
 
-import com.example.paymentservice.domain.ArithmeticOperation;
-import com.example.paymentservice.dto.AccountDto;
-import com.example.paymentservice.entity.Account;
-import com.example.paymentservice.entity.Payment;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.HttpExchange;
+import org.springframework.web.service.annotation.PostExchange;
 
+import com.example.paymentservice.dto.AccountDto;
+import com.example.paymentservice.dto.AccountServiceDto;
+
+@HttpExchange
 public interface AccountService {
+
+	@GetExchange("/account/find/{accountNumber}")
+	public AccountDto findAccount(@PathVariable String accountNumber);
 	
-	AccountDto create(AccountDto accountDto);
-	void updateAccountBalance(Payment payment, ArithmeticOperation ops);
-	Account getAccountBalance(String accountNumber);
-	Account findAccount(String accountNumber);
-	
+	@PostExchange("/account/update")
+	public void updateAccountBalance(@RequestBody AccountServiceDto accountServiceDto);
+
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.paymentservice.domain.ArithmeticOperation;
 import com.example.paymentservice.dto.AccountDto;
+import com.example.paymentservice.dto.AccountServiceDto;
 import com.example.paymentservice.dto.PaymentDto;
 import com.example.paymentservice.dto.PaymentResponseDto;
 import com.example.paymentservice.entity.Account;
@@ -25,10 +26,14 @@ public class PaymentServiceImpl implements PaymentService{
 	private AccountDto accountDto;
 	
 	@Autowired
-	private PaymentResponseDto paymentResponseDto;
+	private AccountServiceDto accountServiceDto;
 	
 	@Autowired
-	private AccountServiceImpl accountServiceImpl;
+	private AccountService accountService;
+	
+	@Autowired
+	private PaymentResponseDto paymentResponseDto;
+	
 	
 	@Autowired
 	PaymentRepository paymentRepository;
@@ -53,11 +58,13 @@ public class PaymentServiceImpl implements PaymentService{
 
 	private void creditOps(Payment payment) {
 		
-		accountServiceImpl.updateAccountBalance(payment, ArithmeticOperation.CREDIT);
+		accountServiceDto.setPayment(payment);
+		accountServiceDto.setOps(ArithmeticOperation.CREDIT);
 		
-		account = accountServiceImpl.findAccount(payment.getCreditAccount());
+		accountService.updateAccountBalance(accountServiceDto);
 		
-		accountDto = AccountMapper.accountToDto(account);
+		accountDto = accountService.findAccount(payment.getCreditAccount());
+
 		
 	}
 
@@ -93,16 +100,20 @@ public class PaymentServiceImpl implements PaymentService{
 
 	private void debitOps(Payment payment) throws Exception {
 		
-		Account account = accountServiceImpl.findAccount(payment.getDebitAccount());
+		accountDto = accountService.findAccount(payment.getDebitAccount());
+		account = AccountMapper.dtoToAccount(accountDto);
 		
 		if ((account.getBalance() - payment.getAmount()) < 0) {
 			throw new Exception("Insufficient Balance");
 		}else {
-			accountServiceImpl.updateAccountBalance(payment, ArithmeticOperation.DEBIT);
 			
-			account = accountServiceImpl.findAccount(payment.getDebitAccount());
+			accountServiceDto.setPayment(payment);
+			accountServiceDto.setOps(ArithmeticOperation.DEBIT);
 			
-			accountDto = AccountMapper.accountToDto(account);
+			accountService.updateAccountBalance(accountServiceDto);
+//			
+			accountDto = accountService.findAccount(payment.getDebitAccount());
+
 		}
 		
 	}
